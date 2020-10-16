@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cosi-controller-manager
+  labels:
+    run: COSIController
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: COSIController
+  template:
+    metadata:
+      labels:
+        app: COSIController
+    spec:
+      containers:
+        - name: cosi-controller-manager
+          image: cosi-controller-manager
+          imagePullPolicy: IfNotPresent
+

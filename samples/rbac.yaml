@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cosi-controller-sa
+  # replace with non-default namespace name
+  namespace: default
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cosi-controller-manager-role
+rules:
+  - apiGroups: ["objectstorage.k8s.io"]
+    resources: ["bucketrequests", "bucketaccessrequests"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["objectstorage.k8s.io"]
+    resources: ["buckets", "bucketaccess"]
+    verbs: ["get", "list", "watch", "update", "create", "delete"]
+  - apiGroups: ["objectstorage.k8s.io"]
+    resources: ["bucketclass","bucketaccessclass"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cosi:system
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cosi-controller-manager-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+# Controller must be able to work with endpoints in current namespace
+# if (and only if) leadership election is enabled
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  # replace with non-default namespace name
+  namespace: default
+  name: cosi-controller-manager
+rules:
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get", "watch", "list", "delete", "update", "create"]
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cosi-controller-manager
+  # replace with non-default namespace name
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+    # replace with non-default namespace name
+    namespace: default
+roleRef:
+  kind: Role
+  name: cosi-controller-manager
+  apiGroup: rbac.authorization.k8s.io

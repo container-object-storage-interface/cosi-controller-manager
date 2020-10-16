@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"k8s.io/apimachinery/pkg/util/uuid"
+	"github.com/container-object-storage-interface/api/apis/objectstorage.k8s.io/v1alpha1"
 )
 
 var (
@@ -34,4 +35,8 @@ func CopyStrings(s []string) []string {
 
 func GetUUID() string {
 	return string(uuid.NewUUID())
+}
+
+func ReadObject(o *v1alpha1.ObjectReference) string {
+	return ""
 }
