@@ -12,7 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMDS=cosi-controller-manager
-all: build
+all: reltools build
+
+.PHONY: reltools
+reltools: download
+download:
+	$(eval CURDIR := $(shell pwd))
+	$(eval TMP := $(shell mktemp -d))
+	$(shell cd ${TMP} && git clone git@github.com:brahmaroutu/api.git)
+	$(shell cp -r ${TMP}/api/release-tools ${CURDIR}/)
+	$(shell rm -rf ${TMP})            
+
+CMDS=cosi-controller-manager 
+
 
 include release-tools/build.make
