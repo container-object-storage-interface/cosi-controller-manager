@@ -126,14 +126,16 @@ func (b *bucketAccessRequestListener) provisionBucketAccess(ctx context.Context,
 
 	bucketaccess = &v1alpha1.BucketAccess{}
 	bucketaccess.Name = util.GetUUID()
-	bucketaccess.Spec.Provisioner = bucketAccessClass.Provisioner
-	bucketaccess.Spec.PolicyActions = bucketAccessClass.PolicyActions
-	bucketaccess.Spec.Parameters = util.CopySS(bucketAccessClass.Parameters) //could use k8s util/maps
 
-	bucketaccess.Spec.BucketAccessRequestName = bucketAccessRequest.Name
-	bucketaccess.Spec.BucketAccessRequestNamespace = bucketAccessRequest.Namespace
-	bucketaccess.Spec.ServiceAccountName = bucketAccessRequest.Spec.ServiceAccountName
-	bucketaccess.Spec.AccessSecretName = bucketAccessRequest.Spec.AccessSecretName
+	bucketaccess.Spec.BucketInstanceName = bucketRequest.Spec.BucketInstanceName
+	bucketaccess.Spec.BucketAccessRequest = bucketAccessRequest.Name
+	bucketaccess.Spec.ServiceAccount = bucketAccessRequest.Spec.ServiceAccountName
+	//bucketaccess.Spec.MintedSecretName - set by the driver
+	bucketaccess.Spec.PolicyActionsConfigMapData = util.ReadObject(bucketAccessClass.PolicyActionsConfigMap)
+	bucketaccess.Spec.Principal = bucketAccessRequest.Namespace
+
+	bucketaccess.Spec.Provisioner = bucketAccessClass.Provisioner
+	bucketaccess.Spec.Parameters = util.CopySS(bucketAccessClass.Parameters) //could use k8s util/maps
 
 	bucketaccess, err = b.bucketClient.ObjectstorageV1alpha1().BucketAccesses().Create(context.Background(), bucketaccess, metav1.CreateOptions{})
 	if err == nil || apierrs.IsAlreadyExists(err) {

@@ -117,17 +117,17 @@ func (b *bucketRequestListener) provisionBucketRequestOperation(ctx context.Cont
 	bucket = &v1alpha1.Bucket{}
 	bucket.Name = util.GetUUID()
 	bucket.Spec.Provisioner = "testProvisioner"
-	bucket.Spec.ReleasePolicy = bucketClass.ReleasePolicy
+	bucket.Spec.RetentionPolicy = bucketClass.RetentionPolicy
 	bucket.Spec.AnonymousAccessMode = v1alpha1.AnonymousAccessMode{PublicReadWrite: true}
 	bucket.Spec.BucketClassName = bucketClass.Name
 	bucket.Spec.AllowedNamespaces = util.CopyStrings(bucketClass.AllowedNamespaces) //could use k8s util/slice
-	bucket.Spec.BucketAccessBindings = []string{}
 	// TODO have a switch statement to populate appropriate protocol based on BR.Protocol
-	bucket.Spec.Protocol = v1alpha1.Protocol{ProtocolSignature: v1alpha1.ProtocolSignatureS3, S3: &v1alpha1.S3Protocol{Endpoint: "aws.com/s3", BucketName: "testbucket", Region: "US", SignatureVersion: "s3v2"}}
+	bucket.Spec.Protocol.RequestedProtocol = bucketRequest.Spec.Protocol
 	bucket.Spec.Parameters = util.CopySS(bucketClass.Parameters) //could use k8s util/maps
 
 	bucket, err = b.bucketClient.ObjectstorageV1alpha1().Buckets().Create(context.Background(), bucket, metav1.CreateOptions{})
 	if err != nil {
+		fmt.Println("Error occurred when creating bucket ", err)
 	}
 	if err == nil || apierrs.IsAlreadyExists(err) {
 		glog.V(5).Infof("Bucket %s saved", bucket.Name)
