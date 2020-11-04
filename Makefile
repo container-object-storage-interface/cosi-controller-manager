@@ -15,15 +15,15 @@
 all: reltools build
 
 .PHONY: reltools
-reltools: download
-download:
+reltools: ./release-tools/build.make
+./release-tools/build.make:
 	$(eval CURDIR := $(shell pwd))
 	$(eval TMP := $(shell mktemp -d))
-	$(shell cd ${TMP} && git clone git@github.com:brahmaroutu/api.git)
+	$(shell cd ${TMP} && git clone git@github.com:container-object-storage-interface/api.git)
 	$(shell cp -r ${TMP}/api/release-tools ${CURDIR}/)
 	$(shell rm -rf ${TMP})            
 
-CMDS=cosi-controller-manager 
+CMDS=controller-manager 
 
 
 include release-tools/build.make
